@@ -25,7 +25,7 @@ public class SokobanMoveSearchAdapter implements Searchable<Position> {
 
 	@Override
 	public State<Position> getInitialState() {
-		//Position p = new Position(level.getActors().get(0).getP());
+
 		Position p=new Position(current);
 		State<Position> initialState = new State<Position>(p);
 		return initialState;

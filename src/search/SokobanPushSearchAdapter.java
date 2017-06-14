@@ -13,14 +13,14 @@ import model.items.Items;
 import model.items.Space;
 import model.items.Wall;
 
-//dont forget to check if there is a maslul from box to goal
+
 
 public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 	private Level2D level;
 	private Position goal;
 	private Position box;
-	private SokobanMoveSearchAdapter move;
 
+/*
 	public Level2D copyLevel(Level2D level) {
 		HashMap<Character, Items> hm;
 		hm = new HashMap<Character, Items>();
@@ -47,9 +47,12 @@ public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 		copy.setRow(level.getRow());
 		copy.setColumn(level.getColumn());
 		copy.setWarehouse(items);
+		copy.actors=new ArrayList<Actor>();
+		copy.getActors().add(new Actor(new Position(level.getActors().get(0).getP())));
+
 		return copy;
 	}
-
+*/
 	public SokobanPushSearchAdapter(Level2D level, Position goal, Position box) {
 		this.level = level;
 		this.box = box;
@@ -62,7 +65,7 @@ public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 		return new State<SokobanState>(state);
 	}
 
-	public void removeBoxFromCopyBoard(Level2D level2d, Position box) {
+	public void removeBoxAndActorFromCopyBoard(Level2D level2d, Position box,Position actor) {
 		if (level2d.getWarehouse()[box.getI()][box.getJ()].getClass().equals(Box.class)) {
 			boolean flag = level2d.getWarehouse()[box.getI()][box.getJ()].ifOnDestination();
 			if (flag == true) {
@@ -73,15 +76,15 @@ public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 			}
 
 		}
-		if(level2d.getWarehouse()[level.getActors().get(0).getP().getI()][level.getActors().get(0).getP().getJ()].getClass().equals(Actor.class)){
-
-			boolean flag = level2d.getWarehouse()[level.getActors().get(0).getP().getI()][level.getActors().get(0).getP().getJ()].ifOnDestination();
+		if (level2d.getWarehouse()[actor.getI()][actor.getJ()].getClass().equals(Actor.class)) {
+			boolean flag = level2d.getWarehouse()[actor.getI()][actor.getJ()].ifOnDestination();
 			if (flag == true) {
-				level2d.getWarehouse()[level.getActors().get(0).getP().getI()][level.getActors().get(0).getP().getJ()] = new Destination_Box(
-						new Position(level.getActors().get(0).getP().getI(), level.getActors().get(0).getP().getJ()));
+				level2d.getWarehouse()[actor.getI()][actor.getJ()] = new Destination_Box(
+						new Position(actor.getI(), actor.getJ()));
 			} else {
-				level2d.getWarehouse()[level.getActors().get(0).getP().getI()][level.getActors().get(0).getP().getJ()] = new Space(new Position(level.getActors().get(0).getP().getI(), level.getActors().get(0).getP().getJ()));
+				level2d.getWarehouse()[actor.getI()][actor.getJ()] = new Space(new Position(actor.getI(), actor.getJ()));
 			}
+
 		}
 
 	}
@@ -89,10 +92,11 @@ public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 	@Override
 	public List<State<SokobanState>> getGoalStates() {
 		List<State<SokobanState>> goalStates = new ArrayList<State<SokobanState>>();
-		// box = goal;
-		Level2D copylevel = copyLevel(level);
+
+		//Level2D copylevel = copyLevel(level);
+		Level2D copylevel = level.copyLevel(level);
 		Position boxOnTarget = goal;
-		removeBoxFromCopyBoard(copylevel, box);
+		removeBoxAndActorFromCopyBoard(copylevel, box,level.getActors().get(0).getP());
 		int i = boxOnTarget.getI();
 		int j = boxOnTarget.getJ();
 		if (i > 0) {
@@ -121,184 +125,191 @@ public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 					|| copylevel.getWarehouse()[i][j - 1].getClass().equals(Destination_Box.class)) {
 				goalStates.add(new State<SokobanState>(new SokobanState(boxOnTarget, new Position(i, j - 1))));
 			}
-			// System.out.println("i: "+ i+" j:" +j);
+
 		}
 
 		return goalStates;
 
 	}
 
-	public boolean ifPossibleToPush(int i_actorNew,int j_actorNew ,int i_boxNew,int j_boxNew, String direction, HashMap<Action, State<SokobanState>> map)
-	{
+	public void ifPossibleToPush(int i_actorNew, int j_actorNew, int i_boxNew, int j_boxNew, String direction,
+			HashMap<Action, State<SokobanState>> map) {
+		//Level2D copylevel = copyLevel(level);
+		Level2D copylevel =level.copyLevel(level);
 
-			if ((level.getWarehouse()[i_boxNew][j_boxNew].getClass().equals(Space.class))
-					|| level.getWarehouse()[i_boxNew][j_boxNew].getClass().equals(Destination_Box.class)) {
 
-				SokobanState s = new SokobanState(new Position(i_boxNew, j_boxNew),
-						new Position(i_actorNew, j_actorNew));
-				State<SokobanState> sokobanstate = new State<SokobanState>(s);
+		removeBoxAndActorFromCopyBoard(copylevel,box, level.getActors().get(0).getP());
 
-				Action act = new Action(direction);
-				map.put(act, sokobanstate);
-				return true ;
+		if ((copylevel.getWarehouse()[i_boxNew][j_boxNew].getClass().equals(Space.class))
+				|| copylevel.getWarehouse()[i_boxNew][j_boxNew].getClass().equals(Destination_Box.class)) {
+
+			SokobanState s = new SokobanState(new Position(i_boxNew, j_boxNew), new Position(i_actorNew, j_actorNew));
+			State<SokobanState> sokobanstate = new State<SokobanState>(s);
+
+			Action act = new Action(direction);
+			Action actNew=ifMapContainsKey(act, map);
+
+			sokobanstate.setCost(sokobanstate.getCost()+1);
+			map.put(actNew, sokobanstate);
+
 
 		}
 
-		return false;
+
 	}
 
+	public void moveActorNearBoxByBfs(Position actorOld, Position boxOld, int i_actorNew, int j_actorNew,
+			HashMap<Action, State<SokobanState>> map ) {
+		Action lastAction= new Action();
+		SokobanMoveSearchAdapter move;
 
-	public void moveActorNearBoxByBfs(Position actorOld ,Position boxOld,int i_actorNew,int j_actorNew , HashMap<Action, State<SokobanState>> map)
-	{
-		if ((level.getWarehouse()[i_actorNew][j_actorNew].getClass().equals(Space.class))
-				|| (level.getWarehouse()[i_actorNew][j_actorNew].getClass()
-						.equals(Destination_Box.class))) {
+		Level2D copylevel=level.copyLevel(level);//////////////////////////////////////////////////////
+		removeBoxAndActorFromCopyBoard(copylevel, box, level.getActors().get(0).getP());
+		copylevel.getWarehouse()[boxOld.getI()][boxOld.getJ()]=new Box(new Position(boxOld.getI(), boxOld.getJ()));
+		if ((copylevel.getWarehouse()[i_actorNew][j_actorNew].getClass().equals(Space.class))
+				|| (copylevel.getWarehouse()[i_actorNew][j_actorNew].getClass().equals(Destination_Box.class))) {
 			Solution solution;
-			Position newpos = new Position(i_actorNew ,j_actorNew);
+			Position newpos = new Position(i_actorNew, j_actorNew);
+			Position actorNew=new Position(i_actorNew, j_actorNew);
 
-			move = new SokobanMoveSearchAdapter(level, newpos, actorOld);
+			move = new SokobanMoveSearchAdapter(copylevel, newpos, actorOld);
 			Searcher<Position> bfs = new BFS<Position>();
+			solution=new Solution();
 			solution = bfs.search(move);
-			if (solution != null) {
-				Action lastAction = solution.getActions().remove(solution.getActions().size()-1);
+			if(solution!=null)
+			if (solution.getActions() != null) {
 
-				//System.out.println("the last"+lastAction.getName());
+
+
+				lastAction = solution.getActions().remove(0);
+
+
 				lastAction.setHistory(solution.getActions());
-				SokobanState s = new SokobanState(new Position(boxOld),
-						new Position(i_actorNew, j_actorNew));
+				Action actNew=ifMapContainsKey(lastAction, map);
+
+				actNew.setHistory(solution.getActions());
+
+
+				SokobanState s = new SokobanState(new Position(boxOld), new Position(i_actorNew, j_actorNew));
 				State<SokobanState> sokobanstate = new State<SokobanState>(s);
-				map.put(lastAction, sokobanstate);
+
+
+				sokobanstate.setCost(solution.getActions().size());
+
+
+				map.put(actNew, sokobanstate);
+
 
 			}
 		}
 
 	}
+	public Action ifMapContainsKey(Action act, HashMap<Action, State<SokobanState>> AllPossibleMoves)
+	{
+		if(AllPossibleMoves.containsKey(act)){
+			Action a=act;
+			int i=0;
+			while(true){
+				Action c= new Action(act.getName()+" "+i);
+
+				if(!AllPossibleMoves.containsKey(c))
+				{
+
+					return c;
 
 
+				}
 
 
+				i++;
 
+			}
+		}
+		else {
+			return act;
+		}
+	}
 	@Override
 	public HashMap<Action, State<SokobanState>> getAllPossibleMoves(State<SokobanState> state) {
 		HashMap<Action, State<SokobanState>> map = new HashMap<>();
 		Position actor = state.getState().getActor_pos();
 		Position boxP = state.getState().getBox_pos();
+		System.out.println("the States: " + state);
+		// the actor left next to box
+		if ((actor.getJ() + 1 == boxP.getJ()) && (actor.getI() == boxP.getI())) {
+			 ifPossibleToPush(actor.getI(), actor.getJ() + 1, boxP.getI(), boxP.getJ() + 1, "move right",
+					map);
+			// bfs to up to box
+			moveActorNearBoxByBfs(actor, boxP, boxP.getI() - 1, boxP.getJ(), map);
+			// bfs to down to box
+			moveActorNearBoxByBfs(actor, boxP, boxP.getI() + 1, boxP.getJ(), map);
 
-		//the actor left next to box
-		if ((actor.getJ() + 1 == boxP.getJ()) && (actor.getI() == boxP.getI())){
-
-		boolean res=ifPossibleToPush(actor.getI(),actor.getJ()+1,boxP.getI(), boxP.getJ()+1,"move right", map);
-		if(res!=true)
-		{
-			//bfs to up to box
-			moveActorNearBoxByBfs(actor, boxP, boxP.getI()-1, boxP.getJ(), map);
-			//bfs to down to box
-			moveActorNearBoxByBfs(actor, boxP, boxP.getI()+1, boxP.getJ(), map);
-		}
 
 		}
-		//the actor right next to box
-		 if(((actor.getJ() - 1 == boxP.getJ()) && (actor.getI() == boxP.getI())))
-		{
-			boolean res=ifPossibleToPush(actor.getI(),actor.getJ()-1,boxP.getI(), boxP.getJ()-1,"move left", map);
-			if (res!=true)
-			{
-				//bfs to up to box
-				moveActorNearBoxByBfs(actor, boxP, boxP.getI()-1, boxP.getJ(), map);
-				//bfs to down to box
-				moveActorNearBoxByBfs(actor, boxP, boxP.getI()+1, boxP.getJ(), map);
+		// the actor right next to box
+		else if (((actor.getJ() - 1 == boxP.getJ()) && (actor.getI() == boxP.getI()))) {
+			 ifPossibleToPush(actor.getI(), actor.getJ() - 1, boxP.getI(), boxP.getJ() - 1, "move left",
+					map);
+			// bfs to up to box
+			moveActorNearBoxByBfs(actor, boxP, boxP.getI() - 1, boxP.getJ(), map);
+			// bfs to down to box
+			moveActorNearBoxByBfs(actor, boxP, boxP.getI() + 1, boxP.getJ(), map);
+
+		}
+		// the actor down to the box
+		else if (((actor.getJ() == boxP.getJ()) && (actor.getI() == boxP.getI() + 1))) {
+			 ifPossibleToPush(actor.getI() - 1, actor.getJ(), boxP.getI() - 1, boxP.getJ(), "move up",
+					map);
+			// bfs right to box
+			moveActorNearBoxByBfs(actor, boxP, boxP.getI(), boxP.getJ() + 1, map);
+			// bfs left to box
+			moveActorNearBoxByBfs(actor, boxP, boxP.getI(), boxP.getJ() - 1, map);
+
+		}
+		// the actor up to the box
+		else if (((actor.getJ() == boxP.getJ()) && (actor.getI() == boxP.getI() - 1))) {
+			 ifPossibleToPush(actor.getI() + 1, actor.getJ(), boxP.getI() + 1, boxP.getJ(), "move down",
+					map);
+			// bfs right to box
+			moveActorNearBoxByBfs(actor, boxP, boxP.getI(), boxP.getJ() + 1, map);
+			// bfs left to box
+			moveActorNearBoxByBfs(actor, boxP, boxP.getI(), boxP.getJ() - 1, map);
+
+
+		}
+		else{// if the actor doesn't near the box
+			BoxState boxState=new BoxState(level, goal, boxP);
+			BFS<Position> bfs=new BFS<>();
+			Solution sol=bfs.search(boxState);
+			if(sol!=null){
+			Action first=sol.getActions().get(0);
+			String moveup="move up";
+			String movedown="move down";
+			String moveleft="move left";
+			String moveright="move right";
+
+			if(first.getName().toLowerCase().contains(moveup.toLowerCase())){
+				// bfs to down to box
+				moveActorNearBoxByBfs(actor, boxP, boxP.getI() + 1, boxP.getJ(), map);
 			}
-		}
-		//the actor down to the box
-		if (((actor.getJ() == boxP.getJ()) && (actor.getI() == boxP.getI()+1)))
-		{
-			boolean res=ifPossibleToPush(actor.getI()-1,actor.getJ(),boxP.getI()-1, boxP.getJ(),"move up", map);
-			if (res!=true)
-			{
-				//bfs right to box
-				moveActorNearBoxByBfs(actor, boxP, boxP.getI(), boxP.getJ()+1, map);
-				//bfs left to box
-				moveActorNearBoxByBfs(actor, boxP, boxP.getI(), boxP.getJ()-1, map);
-
+			else if(first.getName().toLowerCase().contains(movedown.toLowerCase())){
+				// bfs to up to box
+				moveActorNearBoxByBfs(actor, boxP, boxP.getI() - 1, boxP.getJ(), map);
 			}
-		}
-		//the actor up to the box
-		if (((actor.getJ() == boxP.getJ()) && (actor.getI() == boxP.getI()-1)))
-		{
-			boolean res=ifPossibleToPush(actor.getI()+1,actor.getJ(),boxP.getI()+1, boxP.getJ(),"move down", map);
-			if (res!=true)
-			{
-				//bfs right to box
-				moveActorNearBoxByBfs(actor, boxP, boxP.getI(), boxP.getJ()+1, map);
-				//bfs left to box
-				moveActorNearBoxByBfs(actor, boxP, boxP.getI(), boxP.getJ()-1, map);
+			else if(first.getName().toLowerCase().contains(moveright.toLowerCase())){
+				// bfs left to box
+				moveActorNearBoxByBfs(actor, boxP, boxP.getI(), boxP.getJ() - 1, map);
+			}
+			else if(first.getName().toLowerCase().contains(moveleft.toLowerCase())){
+				// bfs right to box
+				moveActorNearBoxByBfs(actor, boxP, boxP.getI(), boxP.getJ() + 1, map);
+			}
 			}
 
 		}
-/*
 
 
-		{
-
-			// state:the actor and box move on step right
-			if ((level.getWarehouse()[boxP.getI()][boxP.getJ() + 1].getClass().equals(Space.class))
-					|| level.getWarehouse()[boxP.getI()][boxP.getJ() + 1].getClass().equals(Destination_Box.class)) {
-
-				SokobanState s = new SokobanState(new Position(boxP.getI(), boxP.getJ() + 1),
-						new Position(actor.getI(), actor.getJ() + 1));
-				State<SokobanState> sokobanstate = new State<SokobanState>(s);
-
-				Action act = new Action("move right");
-				map.put(act, sokobanstate);
-			} else {// אם הקופסה לא יכולה לזוז ימינה נזיז את השחקן למעלה או למטה
-					// בעזרת בי אפ אס וניצור סטייט חדש עם עידכון היסטוריית
-					// הצעדים מהבי אפ אס
-					// השחקן יכול להיות מעל הקופסה
-				if ((level.getWarehouse()[boxP.getI() - 1][boxP.getJ()].getClass().equals(Space.class))
-						|| (level.getWarehouse()[boxP.getI() - 1][boxP.getJ()].getClass()
-								.equals(Destination_Box.class))) {
-					Solution solution;
-					Position newpos = new Position(boxP.getI() - 1, boxP.getJ());
-					move = new SokobanMoveSearchAdapter(level, newpos, actor);
-					Searcher<Position> bfs = new BFS<Position>();
-					solution = bfs.search(move);
-					if (solution != null) {
-						Action lastAction = solution.getActions().remove(0);
-						lastAction.setHistory(solution.getActions());
-						SokobanState s = new SokobanState(new Position(boxP.getI(), boxP.getJ()),
-								new Position(boxP.getI() - 1, boxP.getJ()));
-						State<SokobanState> sokobanstate = new State<SokobanState>(s);
-						map.put(lastAction, sokobanstate);
-
-					}
-
-				}
-				// השחקן יכול להיות מתחת לקופסא
-				if ((level.getWarehouse()[boxP.getI() + 1][boxP.getJ()].getClass().equals(Space.class))
-						|| (level.getWarehouse()[boxP.getI() + 1][boxP.getJ()].getClass()
-								.equals(Destination_Box.class))) {
-					Solution solution;
-					Position newpos = new Position(boxP.getI() + 1, boxP.getJ());
-					move = new SokobanMoveSearchAdapter(level, newpos, actor);
-					Searcher<Position> bfs = new BFS<Position>();
-					solution = bfs.search(move);
-
-					if (solution != null) {
-						Action lastAction = solution.getActions().remove(0);
-						lastAction.setHistory(solution.getActions());
-						SokobanState s = new SokobanState(new Position(boxP.getI(), boxP.getJ()),
-								new Position(boxP.getI() + 1, boxP.getJ()));
-						State<SokobanState> sokobanstate = new State<SokobanState>(s);
-						map.put(lastAction, sokobanstate);
-
-					}
-				}
-
-			}
-		}
-*/
 		return map;
 	}
-
 
 }
