@@ -13,7 +13,10 @@ import strips.Plannable;
 import strips.Predicate;
 
 public class SokobanHeuristic implements HueristicMethod {
-
+/**
+ * the huristic 
+ * choose for each box the target
+ */
 	@Override
 	public Clause heuristic(Plannable plannable) {
 		Clause kb=plannable.getKnowledgebase();

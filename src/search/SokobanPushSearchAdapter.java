@@ -20,39 +20,7 @@ public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 	private Position goal;
 	private Position box;
 
-/*
-	public Level2D copyLevel(Level2D level) {
-		HashMap<Character, Items> hm;
-		hm = new HashMap<Character, Items>();
-		hm.put('A', new Actor());
-		hm.put('@', new Box());
-		hm.put('#', new Wall());
-		hm.put(' ', new Space());
-		hm.put('o', new Destination_Box());
-		Level2D copy = new Level2D();
-		Items[][] items = new Items[level.getColumn()][level.getRow()];
 
-		char[][] ch = new char[level.getColumn()][level.getRow()];
-
-		for (int i = 0; i < level.getColumn(); i++) {
-			for (int j = 0; j < level.getRow(); j++) {
-				ch[i][j] = level.getWarehouse()[i][j].getChar();
-
-				items[i][j] = hm.get(ch[i][j]);
-				items[i][j].setP(new Position(i, j));
-
-			}
-
-		}
-		copy.setRow(level.getRow());
-		copy.setColumn(level.getColumn());
-		copy.setWarehouse(items);
-		copy.actors=new ArrayList<Actor>();
-		copy.getActors().add(new Actor(new Position(level.getActors().get(0).getP())));
-
-		return copy;
-	}
-*/
 	public SokobanPushSearchAdapter(Level2D level, Position goal, Position box) {
 		this.level = level;
 		this.box = box;
@@ -64,7 +32,12 @@ public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 		SokobanState state = new SokobanState(box, level.getActors().get(0).getP());
 		return new State<SokobanState>(state);
 	}
-
+/**
+ * remove the box and the actor from the board
+ * @param level2d
+ * @param box
+ * @param actor
+ */
 	public void removeBoxAndActorFromCopyBoard(Level2D level2d, Position box,Position actor) {
 		if (level2d.getWarehouse()[box.getI()][box.getJ()].getClass().equals(Box.class)) {
 			boolean flag = level2d.getWarehouse()[box.getI()][box.getJ()].ifOnDestination();
@@ -88,7 +61,10 @@ public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 		}
 
 	}
-
+/**
+ * get the goal state
+ * @param list of goal states
+ */
 	@Override
 	public List<State<SokobanState>> getGoalStates() {
 		List<State<SokobanState>> goalStates = new ArrayList<State<SokobanState>>();
@@ -131,7 +107,15 @@ public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 		return goalStates;
 
 	}
-
+/**
+ * check if the actor can push the box 
+ * @param i_actorNew
+ * @param j_actorNew
+ * @param i_boxNew
+ * @param j_boxNew
+ * @param direction
+ * @param map
+ */
 	public void ifPossibleToPush(int i_actorNew, int j_actorNew, int i_boxNew, int j_boxNew, String direction,
 			HashMap<Action, State<SokobanState>> map) {
 		//Level2D copylevel = copyLevel(level);
@@ -157,7 +141,14 @@ public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 
 
 	}
-
+/**
+ * move the actor to the new place
+ * @param actorOld
+ * @param boxOld
+ * @param i_actorNew
+ * @param j_actorNew
+ * @param map
+ */
 	public void moveActorNearBoxByBfs(Position actorOld, Position boxOld, int i_actorNew, int j_actorNew,
 			HashMap<Action, State<SokobanState>> map ) {
 		Action lastAction= new Action();
@@ -204,6 +195,12 @@ public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 		}
 
 	}
+	/**
+	 * if map contains the key
+	 * @param act
+	 * @param AllPossibleMoves
+	 * @return
+	 */
 	public Action ifMapContainsKey(Action act, HashMap<Action, State<SokobanState>> AllPossibleMoves)
 	{
 		if(AllPossibleMoves.containsKey(act)){
@@ -229,6 +226,10 @@ public class SokobanPushSearchAdapter implements Searchable<SokobanState> {
 			return act;
 		}
 	}
+	/**
+	 * get all possible moves
+	 * @param state of sokoban state 
+	 */
 	@Override
 	public HashMap<Action, State<SokobanState>> getAllPossibleMoves(State<SokobanState> state) {
 		HashMap<Action, State<SokobanState>> map = new HashMap<>();

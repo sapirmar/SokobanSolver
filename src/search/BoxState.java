@@ -40,39 +40,15 @@ public class BoxState implements Searchable<Position> {
 		list.add(goalState);
 		return list;
 	}
-
+/**
+ * get all the possible moves
+ */
 	@Override
 	public HashMap<Action, State<Position>> getAllPossibleMoves(State<Position> state) {
 		HashMap<Action, State<Position>> map = new HashMap<>();
 		int i = state.getState().getI();
 		int j = state.getState().getJ();
-		/*
-		 * if (i > 0) { if (level.getWarehouse()[i -
-		 * 1][j].getClass().equals(Space.class) || level.getWarehouse()[i -
-		 * 1][j].getClass().equals(Destination_Box.class)) { Position newpos =
-		 * new Position(i - 1, j); Action act = new Action("move up");
-		 * map.put(act, new State<Position>(newpos)); } } if (level.getColumn()
-		 * - 1 > i) {
-		 *
-		 * if (level.getWarehouse()[i + 1][j].getClass().equals(Space.class) ||
-		 * level.getWarehouse()[i +
-		 * 1][j].getClass().equals(Destination_Box.class)) { Position newpos =
-		 * new Position(i + 1, j); Action act = new Action("move down");
-		 * map.put(act, new State<Position>(newpos)); } } if (level.getRow() - 1
-		 * > j) { if (level.getWarehouse()[i][j +
-		 * 1].getClass().equals(Space.class) || level.getWarehouse()[i][j +
-		 * 1].getClass().equals(Destination_Box.class)) { Position newpos = new
-		 * Position(i, j + 1); Action act = new Action("move right");
-		 * map.put(act, new State<Position>(newpos)); } } if (j > 0) { if
-		 * (level.getWarehouse()[i][j - 1].getClass().equals(Space.class) ||
-		 * level.getWarehouse()[i][j -
-		 * 1].getClass().equals(Destination_Box.class)) { Position newpos = new
-		 * Position(i, j - 1); Action act = new Action("move left");
-		 * map.put(act, new State<Position>(newpos)); } }
-		 *
-		 * return map;
-		 *
-		 */
+		
 		// box move right or left need right and left to be clean
 		if ((level.getRow() - 1 > j) && (j > 0)) {
 			if ((level.getWarehouse()[i][j + 1].getClass().equals(Space.class)

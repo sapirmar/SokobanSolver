@@ -17,7 +17,7 @@ public class MoveAction extends Action {
 		updatePostEffect();
 
 	}
-
+	
 	public void updatePreconditions() {
 		SokPredicate boxAt = new SokPredicate("boxAt", who, from);
 		SokPredicate targetAt = new SokPredicate("targetAt", "?", goal);

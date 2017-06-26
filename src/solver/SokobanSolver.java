@@ -47,7 +47,11 @@ public class SokobanSolver {
 		hm_loader.put("obj", new ObjectLevelCreator());
 
 	}
-
+/**
+ * read the level from the path
+ * @param path
+ * @return the level
+ */
 	public Level2D readLevel(String path) {
 		String type;
 		// give us the 3 last letters indicate the type of file
@@ -57,7 +61,10 @@ public class SokobanSolver {
 		return level;
 
 	}
-
+/**
+ * write to file the moves to solve
+ * @param path
+ */
 	public void writeToFile(String path) {
 		String type;
 		// give us the 3 last letters indicate the type of file
@@ -97,7 +104,17 @@ public class SokobanSolver {
 		}
 
 	}
-
+/**
+ * update the level after the canages
+ * @param copylevel
+ * @param box_i
+ * @param box_j
+ * @param boxGoal_i
+ * @param boxGoal_j
+ * @param actorOld_i
+ * @param actorOld_j
+ * @param last
+ */
 	public void updateLevelAfterChange(Level2D copylevel, int box_i, int box_j, int boxGoal_i, int boxGoal_j,
 			int actorOld_i, int actorOld_j, search.Action last) {
 		String moveup = "move up";
@@ -149,7 +166,11 @@ public class SokobanSolver {
 		}
 
 	}
-
+/**
+ * solve the level
+ * @param level
+ * @return solution
+ */
 	public Solution solve(Level2D level) {
 		SokobanPlannable plannable = new SokobanPlannable((Level2D) level);
 		Level2D copylevel = level.copyLevel(level);

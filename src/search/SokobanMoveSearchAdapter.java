@@ -39,7 +39,9 @@ public class SokobanMoveSearchAdapter implements Searchable<Position> {
 		list.add(goalState);
 		return list;
 	}
-
+/**
+ * get al the possible moves
+ */
 	@Override
 	public HashMap<Action, State<Position>> getAllPossibleMoves(State<Position> state) {
 		HashMap<Action, State<Position>> map = new HashMap<>();

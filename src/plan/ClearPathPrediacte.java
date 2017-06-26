@@ -25,7 +25,14 @@ public class ClearPathPrediacte extends SokPredicate {
 		}
 		return false;
 	}
-	//check if their is path by bfs
+	
+	/**
+	 * check if their is path by the BFS algorithem
+	 * @param level 
+	 * @param goal the target of the box
+	 * @param box the box we want to move
+	 * @return true or false
+	 */
 	public boolean ifPath(Level2D level,Position goal,Position box){
 		this.level=level;
 		this.box=box;
